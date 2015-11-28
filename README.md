@@ -120,7 +120,7 @@ Further reading
   http://www.atmel.com/Images/doc8453.pdf
   Atmel AT1886: Mixing Assembly and C with AVRGCC 
   http://www.atmel.com/Images/doc42055.pdf
-* Only after first implementation of tickbyte, further reading on the topic if
+* Only after first implementation of tickbyte, further reading on the topic of
   sharing stack revealed that FreeRTOS already has a similar approach to RAM
   constrained devices, and unsurprisingly, some of the same restrictions
   http://www.freertos.org/co-routine-limitations.html
