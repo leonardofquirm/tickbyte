@@ -1,9 +1,6 @@
 # tickbyte
 tickbyte real-time kernel
 -------------------------------------------------------------------------------
-README for tickbyte RTOS
-
-
 About
 tickbyte (intentionally left lower case to signify small size) is an attempt at
 writing one of the worlds smallest real time kernels. The name is derived from
@@ -16,6 +13,7 @@ Features for version 0.1
   - 224 bytes program memory usage (43.8% for ATiny4)
   - 6 bytes RAM usage (18.8% for ATtiny4)
 * Typically 3% CPU load consumed by kernel at 1kHz tick rate
+* Currently only supports ATtiny4/5/9/10
 
 
 Usage:
