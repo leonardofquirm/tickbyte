@@ -19,20 +19,22 @@ Features for version 0.1
 
 
 Usage:
+* Originally developed on AVR Studio V4.18. Just add all *.asm files to the
+  "Source Files" folder after creating a new project
 * In tickbyte.asm, find TASK1, TASK2, and TASK3. Place your highest priority
-code (most time critical) in TASK3, medium priority in TASK2 and lowest
-priority in TASK1.
+  code (most time critical) in TASK3, medium priority in TASK2 and lowest
+  priority in TASK1.
 * Optionally you can add code to the IDLE task for instance resetting watchdog
-timer. Note that no timer exists for IDLE task, hence you can't block in IDLE
-task.
+  timer. Note that no timer exists for IDLE task, hence you can't block in IDLE
+  task.
 * To block/delay, load the amount of ticks to delay into the respective task's
-counter, then enter sleep mode. For improved readability, this has been
-included in a macro "blockt". Eg to block for 10 ticks in task2:
-blockt	T2_count,	10			;Wait 10 ticks
+  counter, then enter sleep mode. For improved readability, this has been
+  included in a macro "blockt". Eg to block for 10 ticks in task2:
+  blockt	T2_count,	10			;Wait 10 ticks
 * Registers 17 to 21 are reserved for the task switcher, so writing to them may
-cause undesired results. For those interested, refer to tickbytedef.inc
+  cause undesired results. For those interested, refer to tickbytedef.inc
 * Blocking for 1 tick does not allow lower priority tasks to run - it blocks
-only for 1 tick and is ready to run at the next tick interrupt!
+  only for 1 tick and is ready to run at the next tick interrupt!
 
 
 Dependencies:
@@ -43,6 +45,7 @@ Dependencies:
 The tickbyte kernel is meant for extremely low memory targets and so needs to
 have some functionality removed that is normally included in traditional
 kernels. Special care needs to be taken regarding the following:
+
 (1) Registers R0 to R31 (or in the case of ATtiny4, R16 to R31) are shared and
 so will not be pushed and popped to/from stack during context switching. The
 only values saved in memory are the program counter (automatically done by AVR
@@ -91,38 +94,38 @@ Todo
 * Port to GCC
 * After having ported to GCC, allow tasks to be written in C
 * Implement mechanism to allow other tasks that are ready to run to get
-processor time without waiting for the next tick interrupt
+  processor time without waiting for the next tick interrupt
 * Add option of specifying tick rate and letting the tick interrupt trigger on
-timer compare match instead of a timer overflow. This might slightly increase
-code size
+  timer compare match instead of a timer overflow. This might slightly increase
+  code size
 * Investigate possibility of removing ready to run register and selecting next
-task to run solely on timer values
+  task to run solely on timer values
 
 
 Thanks to
 * The FreeRTOS team for providing information on how real-time operating
-systems work. Their website contains a wealth of information
-http://www.freertos.org/
+  systems work. Their website contains a wealth of information
+  http://www.freertos.org/
 * The FemtoOS team for challenging other developers to make even smaller
-operating systems
-http://femtoos.org/
+  operating systems
+  http://femtoos.org/
 * The Helium OS team. Much inspiration on the task switcher has been drawn from
-their uncomplicated and well commented source code
-http://helium.sourceforge.net/
+  their uncomplicated and well commented source code
+  http://helium.sourceforge.net/
 
 
 Further reading
 * ATtiny4/5/9/10 data sheet
-http://www.atmel.com/Images/Atmel-8127-AVR-8-bit-Microcontroller-ATtiny4-ATtiny5-ATtiny9-ATtiny10_Datasheet.pdf
+  http://www.atmel.com/Images/Atmel-8127-AVR-8-bit-Microcontroller-ATtiny4-ATtiny5-ATtiny9-ATtiny10_Datasheet.pdf
 * Once project has been ported to GCC:
-Atmel AVR4027: Tips and Tricks to Optimize Your C Code for 8-bit AVR Microcontrollers
-http://www.atmel.com/Images/doc8453.pdf
-Atmel AT1886: Mixing Assembly and C with AVRGCC 
-http://www.atmel.com/Images/doc42055.pdf
+  Atmel AVR4027: Tips and Tricks to Optimize Your C Code for 8-bit AVR Microcontrollers
+  http://www.atmel.com/Images/doc8453.pdf
+  Atmel AT1886: Mixing Assembly and C with AVRGCC 
+  http://www.atmel.com/Images/doc42055.pdf
 * Only after first implementation of tickbyte, further reading on the topic if
-sharing stack revealed that FreeRTOS already has a similar approach to RAM
-constrained devices, and unsurprisingly, some of the same restrictions
-http://www.freertos.org/co-routine-limitations.html
+  sharing stack revealed that FreeRTOS already has a similar approach to RAM
+  constrained devices, and unsurprisingly, some of the same restrictions
+  http://www.freertos.org/co-routine-limitations.html
 * How FreeRTOS works. Not the same way tickbyte works, but interesting reading
-for anyone interested in RTOS. Example of impementation on AVR
-http://www.freertos.org/implementation/a00018.html
+  for anyone interested in RTOS. Example of impementation on AVR
+  http://www.freertos.org/implementation/a00018.html
