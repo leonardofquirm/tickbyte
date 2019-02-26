@@ -14,7 +14,7 @@ TIM0_OVF:							;ISR_TOV0
 SaveContext:
 	;Save context of task currently running: Check which task is running
 	cpi		CurTask,	Idlcurrent
-	breq	T1Dec
+	breq	Dummysaveidl
 	cpi		CurTask,	T1current
 	breq	Savecont1
 	cpi		CurTask,	T2current
@@ -43,6 +43,11 @@ Savecont1:
 	pop		gen_reg
 	sts		T1ContAdrL,	gen_reg
 	rjmp	T1Dec
+
+Dummysaveidl:
+	;Dummy save context: pop from stack to prevent stack overflow
+	pop		gen_reg
+	pop		gen_reg
 
 	;Decrement counters
 T1Dec:
