@@ -57,10 +57,6 @@ RESET:
 	
 .endif
 
-	;Setup PortB
-	ldi		gen_reg,	1<<DDB0		;PB0 = output
-	out		DDRB,		gen_reg
-
 	;Setup sleep mode
 	;For now we'll use the default idle sleep mode, no need to set SMCR
 	;ldi		gen_reg,	0x00
@@ -95,6 +91,9 @@ RESET:
 	;Enable sleep mode
 	ldi		gen_reg,	1<<SE		
 	out		SMCR,		gen_reg		;Write SE bit in SMCR to logic one
+
+	;Initialize tasks
+	rcall	init_tasks
 
 	;Enable interrupts
 	sei
