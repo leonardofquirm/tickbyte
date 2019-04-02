@@ -52,6 +52,15 @@ T3ContAdrH:		.byte	1
 ExitMacro:
 .ENDMACRO
 
+;Macro used for blocking tasks
+.MACRO	blocktv	;@0:Timer	;@1:RAM addr containing value to be loaded in timer
+	;Load new value into counter
+	lds		@0,	@1			;Wait number of ticks specified in @1 arguement
+	;Enter sleep mode
+	sleep	
+ExitMacro:
+.ENDMACRO
+
 #endif
 
 ;***EOF
