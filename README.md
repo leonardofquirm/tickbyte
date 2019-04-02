@@ -1,14 +1,14 @@
 # tickbyte
-tickbyte real-time kernel
+## tickbyte real-time kernel
 -------------------------------------------------------------------------------
-About
+## About
 tickbyte (intentionally left lower case to signify small size) is an attempt at
 writing one of the worlds smallest real time kernels. The name is derived from
 two words: tick, which refers to the system tick; and byte, which is our
 (admittedly overambitious) goal of kernel size, 1 byte
 
 
-Features for version 0.1
+## Features for version 0.1
 * Project with all 3 tasks already populated with a blocking statement
   - 224 bytes program memory usage (43.8% for ATiny4)
   - 6 bytes RAM usage (18.8% for ATtiny4)
@@ -16,7 +16,7 @@ Features for version 0.1
 * Currently only supports ATtiny4/5/9/10
 
 
-Usage:
+## Usage
 * Originally developed on AVR Studio V4.18. Just add all *.asm files to the
   "Source Files" folder after creating a new project
 * In tickbyte.asm, find TASK1, TASK2, and TASK3. Place your highest priority
@@ -35,7 +35,7 @@ Usage:
   only for 1 tick and is ready to run at the next tick interrupt!
 
 
-Dependencies:
+Dependencies
 * tn4def.inc distributed with AVR Studio
 * AVR assembler supporting target MCU
 
@@ -44,51 +44,51 @@ The tickbyte kernel is meant for extremely low memory targets and so needs to
 have some functionality removed that is normally included in traditional
 kernels. Special care needs to be taken regarding the following:
 
-(1) Registers R0 to R31 (or in the case of ATtiny4, R16 to R31) are shared and
+1. Registers R0 to R31 (or in the case of ATtiny4, R16 to R31) are shared and
 so will not be pushed and popped to/from stack during context switching. The
 only values saved in memory are the program counter (automatically done by AVR
 core during interrupt)
 
-(2) The stack is shared by all tasks
+2. The stack is shared by all tasks
 
-(3) No formal inter-task communication. Tasks should post messages to each
+3. No formal inter-task communication. Tasks should post messages to each
 other using a single byte register or stack address, or temporarily turn off
 interrupts during writing to or reading from multiple byte messages.
 
-(4) No functions to create and destroy tasks on the fly, all tasks are created
+4. No functions to create and destroy tasks on the fly, all tasks are created
 during initialization
 
-(5) Maximum of 3 tasks, excluding idle task
+5. Maximum of 3 tasks, excluding idle task
 
-(6) All tasks differ in priority, with task3 highest priority and task1 lowest
+6. All tasks differ in priority, with task3 highest priority and task1 lowest
 priority
 
-(7) When calling a subroutine from a task, do not block from inside the called
+7. When calling a subroutine from a task, do not block from inside the called
 subroutine. IE only block in task subroutines themselves
 
-(8) Avoid pushing and popping to/from stack. Instead, rather declare variables
+8. Avoid pushing and popping to/from stack. Instead, rather declare variables
 directly in RAM
 
-(9) Binary semaphores can be implemented by creating a variable in RAM
+9. Binary semaphores can be implemented by creating a variable in RAM
 
-(10) As part of an attempt to reduce code size, the idle task runs at startup
+10. As part of an attempt to reduce code size, the idle task runs at startup
 instead of Task3
 
-(11) During tick interrupt, the status register is not saved on stack,
+11. During tick interrupt, the status register is not saved on stack,
 therefore it's recommended to disable interrupts before executing an operation
 that depends on the status register, and enabling interrupts again afterwards.
 Also do not block when interrupts are disabled
 
-(12) If a task blocks, the kernel waits until the next tick interrupt to give
+12. If a task blocks, the kernel waits until the next tick interrupt to give
 other tasks CPU time. In other words, processing time is wasted by going into
 sleep when other tasks may be ready to run. Ideally, one would like to have
 other tasks get processor time in the same tick period
 
-(13) The timer used to generate the systick interrupt is currently set to
+13. The timer used to generate the systick interrupt is currently set to
 interrupt on overflow, therefore the tick rate is not adjustable
 
 
-Todo
+## Todo
 * Port to GCC
 * After having ported to GCC, allow tasks to be written in C
 * Implement mechanism to allow other tasks that are ready to run to get
@@ -100,7 +100,7 @@ Todo
   task to run solely on timer values
 
 
-Thanks to
+## Thanks to
 * The FreeRTOS team for providing information on how real-time operating
   systems work. Their website contains a wealth of information
   http://www.freertos.org/
@@ -112,7 +112,7 @@ Thanks to
   http://helium.sourceforge.net/
 
 
-Further reading
+## Further reading
 * ATtiny4/5/9/10 data sheet
   http://www.atmel.com/Images/Atmel-8127-AVR-8-bit-Microcontroller-ATtiny4-ATtiny5-ATtiny9-ATtiny10_Datasheet.pdf
 * Once project has been ported to GCC:
