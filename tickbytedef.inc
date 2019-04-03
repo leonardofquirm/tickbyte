@@ -17,6 +17,7 @@
 .equ	T1readybit		=		1	;Task 1 ready to run bit
 .equ	T2readybit		=		2	;Task 2 ready to run bit
 .equ	T3readybit		=		3	;Task 3 ready to run bit
+.equ	Nottickbit		=		7	;Bit indicating manual ISR call
 
 .equ	T1rdymask		=		0b00000010	;Task 1 ready to run mask
 .equ	T2rdymask		=		0b00000100	;Task 2 ready to run mask
