@@ -26,7 +26,7 @@ Savecont3:
 	sts		T3ContAdrH,	gen_reg
 	pop		gen_reg
 	sts		T3ContAdrL,	gen_reg
-	rjmp	T1Dec
+	rjmp	DecCounters
 
 Savecont2:
 	;Save context of task 2
@@ -34,7 +34,7 @@ Savecont2:
 	sts		T2ContAdrH,	gen_reg
 	pop		gen_reg
 	sts		T2ContAdrL,	gen_reg
-	rjmp	T1Dec
+	rjmp	DecCounters
 
 Savecont1:
 	;Save context of task 1
@@ -42,14 +42,17 @@ Savecont1:
 	sts		T1ContAdrH,	gen_reg
 	pop		gen_reg
 	sts		T1ContAdrL,	gen_reg
-	rjmp	T1Dec
+	rjmp	DecCounters
 
 Dummysaveidl:
 	;Dummy save context: pop from stack to prevent stack overflow
 	pop		gen_reg
 	pop		gen_reg
 
+DecCounters:
 	;Decrement counters
+	sbrc	Ready2run,	Nottickbit	;Don't decrement counters on task yield
+	rjmp	RestContext
 T1Dec:
 	;Decrement counter 1
 	dec		T1_count
@@ -82,8 +85,10 @@ ClearT3Bit:
 SetT3bit:
 	sbr		Ready2run,	T3rdymask
 	inc		T3_count				;Clear counter
+	;rjmp	RestContext	
 
 RestContext:
+	cbr		Ready2run,	(1 << Nottickbit)
 	;Check which task to run next, restore context
 	;Task switcher based on the model of:
 	; - Task 3 highest priority

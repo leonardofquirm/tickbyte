@@ -43,8 +43,12 @@ T3ContAdrL:		.byte	1
 .org	RAMEND - 5
 T3ContAdrH:		.byte	1
 
-;Macro used for blocking tasks
-.MACRO	blockt	;@0:Timer	;@1:Value to be loaded in timer
+;******************************************************************************
+; Macro used for blocking tasks, passing constant
+; @0: Timer
+; @1: Value to be loaded in timer
+;******************************************************************************
+.MACRO	blockt
 	;Load new value into counter
 	ldi		@0,	@1			;Wait number of ticks specified in @1 arguement
 	;Enter sleep mode
@@ -52,13 +56,49 @@ T3ContAdrH:		.byte	1
 ExitMacro:
 .ENDMACRO
 
-;Macro used for blocking tasks
-.MACRO	blocktv	;@0:Timer	;@1:RAM addr containing value to be loaded in timer
+;******************************************************************************
+; Macro used for blocking tasks, passing variable in RAM instead of constant
+; @0: Timer
+; @1: RAM addr containing value to be loaded in timer
+;******************************************************************************
+.MACRO	blocktv
 	;Load new value into counter
 	lds		@0,	@1			;Wait number of ticks specified in @1 arguement
 	;Enter sleep mode
 	sleep	
 ExitMacro:
+.ENDMACRO
+
+;******************************************************************************
+; Macro used for blocking tasks, passing constant
+; @0: Timer
+; @1: Value to be loaded in timer
+; @2: Bit number in Ready2run of currently running task, e.g. T1readybit
+;******************************************************************************
+.MACRO	blockt_yield
+	;Load new value into counter
+	ldi		@0,	@1			;Wait number of ticks specified in @1 arguement
+	;Yield
+	cli
+	cbr		Ready2run,	(1 << @2)	;Currently running task no longer ready to run
+	sbr		Ready2run,	(1 << Nottickbit)
+	rcall	TIM0_OVF
+.ENDMACRO
+
+;******************************************************************************
+; Macro used for blocking tasks, passing variable in RAM instead of constant
+; @0: Timer
+; @1: RAM addr containing value to be loaded in timer
+; @2: Bit number in Ready2run of currently running task, e.g. T1readybit
+;******************************************************************************
+.MACRO	blocktv_yield
+	;Load new value into counter
+	lds		@0,	@1			;Wait number of ticks specified in @1 arguement
+	;Yield
+	cli
+	cbr		Ready2run,	(1 << @2)	;Currently running task no longer ready to run
+	sbr		Ready2run,	(1 << Nottickbit)
+	rcall	TIM0_OVF
 .ENDMACRO
 
 #endif
