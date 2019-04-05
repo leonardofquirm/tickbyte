@@ -7,6 +7,33 @@
 #ifndef _TICKBYTEDEF_INC_
 #define _TICKBYTEDEF_INC_
 
+;******************************************************************************
+; USE_TASK_YIELD
+; Commenting this line will reduce code size for doing context switch. Doing
+; so, the programmer promises that block time used in higher priority tasks are
+; long enough to not starve lower priority tasks of CPU time, since the CPU is
+; placed in sleep mode each time a task blocks instead of yielding
+;******************************************************************************
+;.equ USE_TASK_YIELD = 0x01
+
+;******************************************************************************
+; ACCURATE_TICK
+; Uncomment this line for ability to set up timer for tick interrupt with a 
+; better defined value for more accurate tick interrupt timing, at the expense
+; of more program space usage for initialization of timer. Otherwise the timer
+; overflow interrupt mechanism is used as tick interrupt
+;******************************************************************************
+;.equ ACCURATE_TICK = 0x01
+
+;******************************************************************************
+; USE_MAX_START_BLOCK_TIME
+; Uncommenting this line will reduce code size for initialization of timers,
+; but will cause all tasks to block for the maximum possible block time at
+; startup
+;******************************************************************************
+.equ USE_MAX_START_BLOCK_TIME = 0x01
+
+
 .def	gen_reg			=		r16	;General register
 .def	T1_count		=		r17	;Task 1 counter
 .def	T2_count		=		r18	;Task 2 counter
@@ -44,6 +71,8 @@ T3ContAdrL:		.byte	1
 .org	RAMEND - 5
 T3ContAdrH:		.byte	1
 
+.ifndef USE_TASK_YIELD
+
 ;******************************************************************************
 ; Macro used for blocking tasks, passing constant
 ; @0: Timer
@@ -52,9 +81,35 @@ T3ContAdrH:		.byte	1
 .MACRO	blockt
 	;Load new value into counter
 	ldi		@0,	@1			;Wait number of ticks specified in @1 arguement
-	;Enter sleep mode
-	sleep	
+	sleep
 ExitMacro:
+.ENDMACRO
+
+;******************************************************************************
+; Macro used for blocking tasks, passing variable in RAM instead of constant
+; @0: Timer
+; @1: RAM addr containing value to be loaded in timer
+;******************************************************************************
+.MACRO	blocktv
+.MESSAGE "Warning: blocking with variable argument with task yielding disabled"
+	;Load new value into counter
+	lds		@0,	@1			;Wait number of ticks specified in @1 arguement
+	sleep
+ExitMacro:
+.ENDMACRO
+
+.else
+
+;******************************************************************************
+; Macro used for blocking tasks, passing constant
+; @0: Timer
+; @1: Value to be loaded in timer
+;******************************************************************************
+.MACRO	blockt
+	;Load new value into counter
+	ldi		@0,	@1			;Wait number of ticks specified in @1 arguement
+	cli
+	rcall	TASK_YIELD
 .ENDMACRO
 
 ;******************************************************************************
@@ -65,42 +120,11 @@ ExitMacro:
 .MACRO	blocktv
 	;Load new value into counter
 	lds		@0,	@1			;Wait number of ticks specified in @1 arguement
-	;Enter sleep mode
-	sleep	
-ExitMacro:
+	cli
+	rcall	TASK_YIELD
 .ENDMACRO
 
-;******************************************************************************
-; Macro used for blocking tasks, passing constant
-; @0: Timer
-; @1: Value to be loaded in timer
-; @2: Bit number in Ready2run of currently running task, e.g. T1readybit
-;******************************************************************************
-.MACRO	blockt_yield
-	;Load new value into counter
-	ldi		@0,	@1			;Wait number of ticks specified in @1 arguement
-	;Yield
-	cli
-	cbr		Ready2run,	(1 << @2)	;Currently running task no longer ready to run
-	sbr		Ready2run,	(1 << Nottickbit)
-	rcall	TIM0_OVF
-.ENDMACRO
-
-;******************************************************************************
-; Macro used for blocking tasks, passing variable in RAM instead of constant
-; @0: Timer
-; @1: RAM addr containing value to be loaded in timer
-; @2: Bit number in Ready2run of currently running task, e.g. T1readybit
-;******************************************************************************
-.MACRO	blocktv_yield
-	;Load new value into counter
-	lds		@0,	@1			;Wait number of ticks specified in @1 arguement
-	;Yield
-	cli
-	cbr		Ready2run,	(1 << @2)	;Currently running task no longer ready to run
-	sbr		Ready2run,	(1 << Nottickbit)
-	rcall	TIM0_OVF
-.ENDMACRO
+.endif ; USE_TASK_YIELD
 
 #endif
 

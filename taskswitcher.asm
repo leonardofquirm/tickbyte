@@ -4,13 +4,23 @@
 ;*
 ;******************************************************************************
 
+.cseg
+
+;******************************************************************************
+; Task yield. Called from a task to force context switch
+;******************************************************************************
+.ifdef USE_TASK_YIELD
+TASK_YIELD:
+	mov		gen_reg,	CurTask
+	com		gen_reg					;If inverted logic is used for Ready2run, this instruction can be removed
+	and		Ready2run,	gen_reg		;Currently running task no longer ready to run
+	sbr		Ready2run,	(1 << Nottickbit)
+	;rjmp	TIM0_OVF
+.endif ; USE_TASK_YIELD
 ;******************************************************************************
 ; TIMER 0 overflow interrupt service routine. AKA RTOS tick
 ;******************************************************************************
-
-.cseg
 TIM0_OVF:							;ISR_TOV0
-
 SaveContext:
 	;Save context of task currently running: Check which task is running
 	cpi		CurTask,	Idlcurrent
@@ -51,8 +61,10 @@ Dummysaveidl:
 
 DecCounters:
 	;Decrement counters
+.ifdef USE_TASK_YIELD
 	sbrc	Ready2run,	Nottickbit	;Don't decrement counters on task yield
 	rjmp	RestContext
+.endif ; USE_TASK_YIELD
 T1Dec:
 	;Decrement counter 1
 	dec		T1_count
@@ -88,7 +100,9 @@ SetT3bit:
 	;rjmp	RestContext	
 
 RestContext:
+.ifdef USE_TASK_YIELD
 	cbr		Ready2run,	(1 << Nottickbit)
+.endif ; USE_TASK_YIELD
 	;Check which task to run next, restore context
 	;Task switcher based on the model of:
 	; - Task 3 highest priority

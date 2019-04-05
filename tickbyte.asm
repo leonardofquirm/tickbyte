@@ -18,12 +18,12 @@
 RESET:
 	;Initialize counters. These should not be zero unless maximum start block
 	;time is desired for the particular task
+.ifndef USE_MAX_START_BLOCK_TIME
 	ldi		T1_count,	0x01
 	ldi		T2_count,	0x01
 	ldi		T3_count,	0x01
+.endif ; USE_MAX_START_BLOCK_TIME
 
-;Uncomment this line for ability to setup timer with increased accuracy
-;.equ ACCURATE_TICK = 0x01
 .ifndef ACCURATE_TICK
 ;Setup timer 0
 	ldi		gen_reg,	1<<CS00		;Clock source = system clock, no prescaler
