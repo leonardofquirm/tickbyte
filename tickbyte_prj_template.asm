@@ -15,7 +15,7 @@
 ;******************************************************************************
 ; init_tasks: Initialize tasks
 ;******************************************************************************
-init_tasks:
+INIT_TASKS:
 	;Place initialization code here, e.g. I/O port data direction
 
 	ret
