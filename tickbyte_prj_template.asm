@@ -5,7 +5,6 @@
 ; priority in TASK2 and lowest priority in TASK1
 ;******************************************************************************
 
-.include "tn4def.inc"
 .include "tickbytedef.inc"
 .include "tickbyte.asm"
 

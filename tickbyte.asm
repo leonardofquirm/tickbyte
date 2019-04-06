@@ -143,85 +143,85 @@ TASK_YIELD:
 ; TIMER 0 overflow interrupt service routine. AKA RTOS tick
 ;******************************************************************************
 TIM0_OVF:							;ISR_TOV0
-SaveContext:
+SAVE_CONTEXT:
 	;Save context of task currently running: Check which task is running
 	cpi		CurTask,	Idlcurrent
-	breq	Dummysaveidl
+	breq	DUMMY_SAVE_IDL
 	cpi		CurTask,	T1current
-	breq	Savecont1
+	breq	SAVECONT1
 	cpi		CurTask,	T2current
-	breq	Savecont2
+	breq	SAVECONT2
 
-Savecont3:
+SAVECONT3:
 	;Save context of task 3
 	pop		gen_reg
 	sts		T3ContAdrH,	gen_reg
 	pop		gen_reg
 	sts		T3ContAdrL,	gen_reg
-	rjmp	DecCounters
+	rjmp	DEC_COUNTERS
 
-Savecont2:
+SAVECONT2:
 	;Save context of task 2
 	pop		gen_reg
 	sts		T2ContAdrH,	gen_reg
 	pop		gen_reg
 	sts		T2ContAdrL,	gen_reg
-	rjmp	DecCounters
+	rjmp	DEC_COUNTERS
 
-Savecont1:
+SAVECONT1:
 	;Save context of task 1
 	pop		gen_reg
 	sts		T1ContAdrH,	gen_reg
 	pop		gen_reg
 	sts		T1ContAdrL,	gen_reg
-	rjmp	DecCounters
+	rjmp	DEC_COUNTERS
 
-Dummysaveidl:
+DUMMY_SAVE_IDL:
 	;Dummy save context: pop from stack to prevent stack overflow
 	pop		gen_reg
 	pop		gen_reg
 
-DecCounters:
+DEC_COUNTERS:
 	;Decrement counters
 .ifdef USE_TASK_YIELD
 	sbrc	Ready2run,	Nottickbit	;Don't decrement counters on task yield
-	rjmp	RestContext
+	rjmp	REST_CONTEXT
 .endif ; USE_TASK_YIELD
-T1Dec:
+T1_DEC:
 	;Decrement counter 1
 	dec		T1_count
-	brbs	SREG_Z,		SetT1Bit	;Check if sign bit in status reg is set
-ClearT1Bit:
+	brbs	SREG_Z,		SET_T1_BIT	;Check if sign bit in status reg is set
+CLR_T1_BIT:
 	cbr		Ready2run,	T1rdymask
-	rjmp	T2Dec
-SetT1bit:
+	rjmp	T2_DEC
+SET_T1_BIT:
 	sbr		Ready2run,	T1rdymask
 	inc		T1_count				;Clear counter
 
-T2Dec:
+T2_DEC:
 	;Decrement counter 2
 	dec		T2_count
-	brbs	SREG_Z,		SetT2Bit	;Check if sign bit in status reg is set
-ClearT2Bit:
+	brbs	SREG_Z,		SET_T2_BIT	;Check if sign bit in status reg is set
+CLR_T2_BIT:
 	cbr		Ready2run,	T2rdymask
-	rjmp	T3Dec
-SetT2bit:
+	rjmp	T3_DEC
+SET_T2_BIT:
 	sbr		Ready2run,	T2rdymask
 	inc		T2_count				;Clear counter
 
-T3Dec:
+T3_DEC:
 	;Decrement counter 3
 	dec		T3_count
-	brbs	SREG_Z,		SetT3Bit	;Check if sign bit in status reg is set
-ClearT3Bit:
+	brbs	SREG_Z,		SET_T3_BIT	;Check if sign bit in status reg is set
+CLR_T3_BIT:
 	cbr		Ready2run,	T3rdymask
-	rjmp	RestContext
-SetT3bit:
+	rjmp	REST_CONTEXT
+SET_T3_BIT:
 	sbr		Ready2run,	T3rdymask
 	inc		T3_count				;Clear counter
-	;rjmp	RestContext	
+	;rjmp	REST_CONTEXT	
 
-RestContext:
+REST_CONTEXT:
 .ifdef USE_TASK_YIELD
 	cbr		Ready2run,	(1 << Nottickbit)
 .endif ; USE_TASK_YIELD
@@ -232,15 +232,15 @@ RestContext:
 	; - Task 1 lowest priority
 	;If Ready to run register = 0 (No tasks ready to run, therefore run idle task)
 	sbrc	Ready2run,	T3readybit
-	rjmp	RunTask3
+	rjmp	RUN_TASK3
 
 	sbrc	Ready2run,	T2readybit
-	rjmp	RunTask2
+	rjmp	RUN_TASK2
 
 	sbrc	Ready2run,	T1readybit
-	rjmp	RunTask1
+	rjmp	RUN_TASK1
 
-RunIdle:
+RUN_IDLE:
 	;Idle task running
 	ldi		CurTask,	Idlcurrent
 
@@ -250,7 +250,7 @@ RunIdle:
 	push	gen_reg
 	reti
 
-RunTask3:
+RUN_TASK3:
 	;Task1 running
 	ldi		CurTask,	T3current
 
@@ -260,7 +260,7 @@ RunTask3:
 	push	gen_reg
 	reti
 
-RunTask2:
+RUN_TASK2:
 	;Task1 running
 	ldi		CurTask,	T2current
 
@@ -270,7 +270,7 @@ RunTask2:
 	push	gen_reg
 	reti
 
-RunTask1:
+RUN_TASK1:
 	;Task1 running
 	ldi		CurTask,	T1current
 
