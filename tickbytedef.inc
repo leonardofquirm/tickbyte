@@ -28,7 +28,7 @@
 ; of more program space usage for initialization of timer. Otherwise the timer
 ; overflow interrupt mechanism is used as tick interrupt
 ;******************************************************************************
-.equ USE_ACCURATE_TICK = 0x01
+;.equ USE_ACCURATE_TICK = 0x01
 
 ;******************************************************************************
 ; USE_MAX_START_BLOCK_TIME
