@@ -8,6 +8,11 @@
 #define _TICKBYTEDEF_INC_
 
 ;******************************************************************************
+; Specify AVR model include file here
+;******************************************************************************
+.include "tn4def.inc"
+
+;******************************************************************************
 ; USE_TASK_YIELD
 ; Commenting this line will reduce code size for doing context switch. Doing
 ; so, the programmer promises that block time used in higher priority tasks are
@@ -31,7 +36,7 @@
 ; but will cause all tasks to block for the maximum possible block time at
 ; startup
 ;******************************************************************************
-.equ USE_MAX_START_BLOCK_TIME = 0x01
+;.equ USE_MAX_START_BLOCK_TIME = 0x01
 
 
 .def	gen_reg			=		r16	;General register

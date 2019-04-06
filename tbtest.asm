@@ -1,13 +1,14 @@
 ;******************************************************************************
-;*
-;* Tickbyte AVR tasks
-;*
+; tickbyte project template
+;
+; Place your highest priority code (most time critical) in TASK3, medium
+; priority in TASK2 and lowest priority in TASK1
 ;******************************************************************************
 
-;******************************************************************************
-;Place your highest priority code (most time critical) in TASK3, medium
-;priority in TASK2 and lowest priority in TASK1
-;******************************************************************************
+.include "tn4def.inc"
+.include "tickbytedef.inc"
+.include "tickbyte.asm"
+
 
 .cseg
 
