@@ -1,17 +1,34 @@
 ;******************************************************************************
 ;*
-;* Tickbyte AVR main
+;* tickbyte kernel containing
+;* - Initialization
+;* - Task switcher
 ;*
 ;******************************************************************************
-
-.include "tn4def.inc"
 .include "tickbytedef.inc"
-.include "interruptvect.asm"
-.include "taskswitcher.asm"
-.include "usertasks.asm"
-
 
 .cseg
+
+;******************************************************************************
+;*
+;* tickbyte AVR interrupt vectors
+;*
+;******************************************************************************
+;******************************************************************************
+; Interrupt vectors
+;******************************************************************************
+.org	0X0000
+	rjmp	RESET					;the reset vector: jump to "RESET"
+
+.org	OVF0addr
+	rjmp 	TIM0_OVF				;timer 0 overflow interrupt vector
+
+
+;******************************************************************************
+;*
+;* tickbyte AVR main
+;*
+;******************************************************************************
 ;******************************************************************************
 ; MAIN
 ;******************************************************************************
@@ -93,7 +110,7 @@ RESET:
 	out		SMCR,		gen_reg		;Write SE bit in SMCR to logic one
 
 	;Initialize tasks
-	rcall	init_tasks
+	rcall	INIT_TASKS
 
 	;Enable interrupts
 	sei
@@ -104,5 +121,163 @@ IDLE:
 	sleep							;Enter sleep mode
 
 	rjmp	IDLE
+
+
+;******************************************************************************
+;*
+;* tickbyte AVR task switcher
+;*
+;******************************************************************************
+;******************************************************************************
+; Task yield. Called from a task to force context switch
+;******************************************************************************
+.ifdef USE_TASK_YIELD
+TASK_YIELD:
+	mov		gen_reg,	CurTask
+	com		gen_reg					;If inverted logic is used for Ready2run, this instruction can be removed
+	and		Ready2run,	gen_reg		;Currently running task no longer ready to run
+	sbr		Ready2run,	(1 << Nottickbit)
+	;rjmp	TIM0_OVF
+.endif ; USE_TASK_YIELD
+;******************************************************************************
+; TIMER 0 overflow interrupt service routine. AKA RTOS tick
+;******************************************************************************
+TIM0_OVF:							;ISR_TOV0
+SAVE_CONTEXT:
+	;Save context of task currently running: Check which task is running
+	cpi		CurTask,	Idlcurrent
+	breq	DUMMY_SAVE_IDL
+	cpi		CurTask,	T1current
+	breq	SAVECONT1
+	cpi		CurTask,	T2current
+	breq	SAVECONT2
+
+SAVECONT3:
+	;Save context of task 3
+	pop		gen_reg
+	sts		T3ContAdrH,	gen_reg
+	pop		gen_reg
+	sts		T3ContAdrL,	gen_reg
+	rjmp	DEC_COUNTERS
+
+SAVECONT2:
+	;Save context of task 2
+	pop		gen_reg
+	sts		T2ContAdrH,	gen_reg
+	pop		gen_reg
+	sts		T2ContAdrL,	gen_reg
+	rjmp	DEC_COUNTERS
+
+SAVECONT1:
+	;Save context of task 1
+	pop		gen_reg
+	sts		T1ContAdrH,	gen_reg
+	pop		gen_reg
+	sts		T1ContAdrL,	gen_reg
+	rjmp	DEC_COUNTERS
+
+DUMMY_SAVE_IDL:
+	;Dummy save context: pop from stack to prevent stack overflow
+	pop		gen_reg
+	pop		gen_reg
+
+DEC_COUNTERS:
+	;Decrement counters
+.ifdef USE_TASK_YIELD
+	sbrc	Ready2run,	Nottickbit	;Don't decrement counters on task yield
+	rjmp	REST_CONTEXT
+.endif ; USE_TASK_YIELD
+T1_DEC:
+	;Decrement counter 1
+	dec		T1_count
+	brbs	SREG_Z,		SET_T1_BIT	;Check if sign bit in status reg is set
+CLR_T1_BIT:
+	cbr		Ready2run,	T1rdymask
+	rjmp	T2_DEC
+SET_T1_BIT:
+	sbr		Ready2run,	T1rdymask
+	inc		T1_count				;Clear counter
+
+T2_DEC:
+	;Decrement counter 2
+	dec		T2_count
+	brbs	SREG_Z,		SET_T2_BIT	;Check if sign bit in status reg is set
+CLR_T2_BIT:
+	cbr		Ready2run,	T2rdymask
+	rjmp	T3_DEC
+SET_T2_BIT:
+	sbr		Ready2run,	T2rdymask
+	inc		T2_count				;Clear counter
+
+T3_DEC:
+	;Decrement counter 3
+	dec		T3_count
+	brbs	SREG_Z,		SET_T3_BIT	;Check if sign bit in status reg is set
+CLR_T3_BIT:
+	cbr		Ready2run,	T3rdymask
+	rjmp	REST_CONTEXT
+SET_T3_BIT:
+	sbr		Ready2run,	T3rdymask
+	inc		T3_count				;Clear counter
+	;rjmp	REST_CONTEXT	
+
+REST_CONTEXT:
+.ifdef USE_TASK_YIELD
+	cbr		Ready2run,	(1 << Nottickbit)
+.endif ; USE_TASK_YIELD
+	;Check which task to run next, restore context
+	;Task switcher based on the model of:
+	; - Task 3 highest priority
+	; - Task 2 medium priority
+	; - Task 1 lowest priority
+	;If Ready to run register = 0 (No tasks ready to run, therefore run idle task)
+	sbrc	Ready2run,	T3readybit
+	rjmp	RUN_TASK3
+
+	sbrc	Ready2run,	T2readybit
+	rjmp	RUN_TASK2
+
+	sbrc	Ready2run,	T1readybit
+	rjmp	RUN_TASK1
+
+RUN_IDLE:
+	;Idle task running
+	ldi		CurTask,	Idlcurrent
+
+	ldi		gen_reg,	LOW( IDLE )
+	push	gen_reg
+	ldi		gen_reg,	HIGH( IDLE )
+	push	gen_reg
+	reti
+
+RUN_TASK3:
+	;Task1 running
+	ldi		CurTask,	T3current
+
+	lds		gen_reg,	T3ContAdrL
+	push	gen_reg
+	lds		gen_reg,	T3ContAdrH
+	push	gen_reg
+	reti
+
+RUN_TASK2:
+	;Task1 running
+	ldi		CurTask,	T2current
+
+	lds		gen_reg,	T2ContAdrL
+	push	gen_reg
+	lds		gen_reg,	T2ContAdrH
+	push	gen_reg
+	reti
+
+RUN_TASK1:
+	;Task1 running
+	ldi		CurTask,	T1current
+
+	lds		gen_reg,	T1ContAdrL
+	push	gen_reg
+	lds		gen_reg,	T1ContAdrH
+	push	gen_reg
+	reti
 
 ;***EOF

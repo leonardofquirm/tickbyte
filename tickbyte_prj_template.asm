@@ -1,20 +1,20 @@
 ;******************************************************************************
-;*
-;* Tickbyte AVR tasks
-;*
+; tickbyte project template
+;
+; Place your highest priority code (most time critical) in TASK3, medium
+; priority in TASK2 and lowest priority in TASK1
 ;******************************************************************************
 
-;******************************************************************************
-;Place your highest priority code (most time critical) in TASK3, medium
-;priority in TASK2 and lowest priority in TASK1
-;******************************************************************************
+.include "tickbytedef.inc"
+.include "tickbyte.asm"
+
 
 .cseg
 
 ;******************************************************************************
 ; init_tasks: Initialize tasks
 ;******************************************************************************
-init_tasks:
+INIT_TASKS:
 	;Place initialization code here, e.g. I/O port data direction
 
 	ret
