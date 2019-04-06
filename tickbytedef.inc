@@ -22,13 +22,13 @@
 ;.equ USE_TASK_YIELD = 0x01
 
 ;******************************************************************************
-; ACCURATE_TICK
+; USE_ACCURATE_TICK
 ; Uncomment this line for ability to set up timer for tick interrupt with a 
 ; better defined value for more accurate tick interrupt timing, at the expense
 ; of more program space usage for initialization of timer. Otherwise the timer
 ; overflow interrupt mechanism is used as tick interrupt
 ;******************************************************************************
-;.equ ACCURATE_TICK = 0x01
+.equ USE_ACCURATE_TICK = 0x01
 
 ;******************************************************************************
 ; USE_MAX_START_BLOCK_TIME
@@ -37,6 +37,13 @@
 ; startup
 ;******************************************************************************
 ;.equ USE_MAX_START_BLOCK_TIME = 0x01
+
+;******************************************************************************
+; Set output compare match register when USE_ACCURATE_TICK is enabled
+; TickRate = CPU_FREQ / (CmpMatch - 1). Default is to set tick rate at 1kHz
+;******************************************************************************
+.equ	CmpMatchH		=		0x03
+.equ	CmpMatchL		=		0xE7
 
 
 .def	gen_reg			=		r16	;General register

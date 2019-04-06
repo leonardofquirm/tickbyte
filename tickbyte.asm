@@ -19,10 +19,13 @@
 ;******************************************************************************
 .org	0X0000
 	rjmp	RESET					;the reset vector: jump to "RESET"
-
+.ifndef USE_ACCURATE_TICK
 .org	OVF0addr
-	rjmp 	TIM0_OVF				;timer 0 overflow interrupt vector
-
+	rjmp 	TICK_ISR				;timer 0 overflow interrupt vector
+.else
+.org	OC0Aaddr
+	rjmp 	TICK_ISR				;timer 0 output compare match A interrupt vector
+.endif ; USE_ACCURATE_TICK
 
 ;******************************************************************************
 ;*
@@ -41,7 +44,7 @@ RESET:
 	ldi		T3_count,	0x01
 .endif ; USE_MAX_START_BLOCK_TIME
 
-.ifndef ACCURATE_TICK
+.ifndef USE_ACCURATE_TICK
 ;Setup timer 0
 	ldi		gen_reg,	1<<CS00		;Clock source = system clock, no prescaler
 	out		TCCR0B,		gen_reg
@@ -55,15 +58,14 @@ RESET:
 .else
 
 ;Setup timer 0
-	;For 1kHz tick rate at 8MHz div 8 clock, OCR0A must be loaded with 499
-	;Load high byte of 499
-	ldi		gen_reg,	0x01
+	;Load high byte
+	ldi		gen_reg,	CmpMatchH
 	out		OCR0AH,		gen_reg
-	;Load low byte of 499
-	ldi		gen_reg,	0xF3
+	;Load low byte
+	ldi		gen_reg,	CmpMatchL
 	out		OCR0AL,		gen_reg
 	
-	ldi		gen_reg,	1<<CS00		;Clock source = system clock, no prescaler
+	ldi		gen_reg,	(1<<CS00)|(1<<WGM02)		;Clock source = system clock, no prescaler
 	out		TCCR0B,		gen_reg
 	
 	ldi		gen_reg,	1<<OCF0A	;Clear pending interrupt
@@ -137,12 +139,12 @@ TASK_YIELD:
 	com		gen_reg					;If inverted logic is used for Ready2run, this instruction can be removed
 	and		Ready2run,	gen_reg		;Currently running task no longer ready to run
 	sbr		Ready2run,	(1 << Nottickbit)
-	;rjmp	TIM0_OVF
+	;rjmp	TICK_ISR
 .endif ; USE_TASK_YIELD
 ;******************************************************************************
-; TIMER 0 overflow interrupt service routine. AKA RTOS tick
+; RTOS tick interrupt
 ;******************************************************************************
-TIM0_OVF:							;ISR_TOV0
+TICK_ISR:							;ISR_TOV0
 SAVE_CONTEXT:
 	;Save context of task currently running: Check which task is running
 	cpi		CurTask,	Idlcurrent
