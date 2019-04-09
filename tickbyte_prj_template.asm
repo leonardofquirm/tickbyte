@@ -9,6 +9,15 @@
 .include "tickbyte.asm"
 
 
+;******************************************************************************
+; Global variables
+;******************************************************************************
+.dseg
+.org		SRAM_START
+t3blocktime:	.byte		1
+.org		SRAM_START+1
+t2blocktime:       .byte	1
+
 .cseg
 
 ;******************************************************************************
@@ -16,7 +25,10 @@
 ;******************************************************************************
 INIT_TASKS:
 	;Place initialization code here, e.g. I/O port data direction
-
+	ldi		gen_reg,	2
+	sts		t2blocktime,	gen_reg
+	ldi		gen_reg,	5
+	sts		t3blocktime,	gen_reg
 	ret
 
 
@@ -33,7 +45,7 @@ TASK1:
 ; TASK2
 ;******************************************************************************
 TASK2:
-	blockt	T2_count,	2		;Wait 2 ticks
+	blocktv	T2_count,	t2blocktime		;Wait 2 ticks
 
 	rjmp	TASK2
 
@@ -42,7 +54,7 @@ TASK2:
 ; TASK3
 ;******************************************************************************
 TASK3:
-	blockt	T3_count,	5		;Wait 5 ticks
+	blocktv	T3_count,	t3blocktime		;Wait 5 ticks
 
 	rjmp	TASK3
 
