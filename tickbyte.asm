@@ -101,9 +101,11 @@ RESET:
 	;Idle task currently running
 	ldi		CurTask,	Idlcurrent
 
+.ifdef USE_SLEEP_IDLE
 	;Enable sleep mode
 	ldi		gen_reg,	1<<SE		
 	out		SMCR,		gen_reg		;Write SE bit in SMCR to logic one
+.endif ; USE_SLEEP_IDLE
 
 	;Initialize tasks
 	INIT_TASKS
@@ -114,7 +116,9 @@ RESET:
 IDLE:
 	;Reset watchdog timer
 	;wdr
+.ifdef USE_SLEEP_IDLE
 	sleep							;Enter sleep mode
+.endif ; USE_SLEEP_IDLE
 
 	rjmp	IDLE
 
