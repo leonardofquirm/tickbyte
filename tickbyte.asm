@@ -49,9 +49,6 @@ RESET:
 	ldi		gen_reg,	1<<CS00		;Clock source = system clock, no prescaler
 	out		TCCR0B,		gen_reg
 
-	ldi		gen_reg,	1<<TOV0		;Clear pending interrupt
-	out		TIFR0,		gen_reg
-
 	ldi		gen_reg,	1<<TOIE0	;Enable timer 0 overflow interrupt
 	out		TIMSK0,		gen_reg
 	
@@ -67,9 +64,6 @@ RESET:
 	
 	ldi		gen_reg,	(1<<CS00)|(1<<WGM02)		;Clock source = system clock, no prescaler
 	out		TCCR0B,		gen_reg
-	
-	ldi		gen_reg,	1<<OCF0A	;Clear pending interrupt
-	out		TIFR0,		gen_reg
 
 	ldi		gen_reg,	1<<OCIE0A	;Enable output compare A match interrupt
 	out		TIMSK0,		gen_reg
@@ -112,7 +106,7 @@ RESET:
 	out		SMCR,		gen_reg		;Write SE bit in SMCR to logic one
 
 	;Initialize tasks
-	rcall	INIT_TASKS
+	INIT_TASKS
 
 	;Enable interrupts
 	sei

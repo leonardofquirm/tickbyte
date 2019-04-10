@@ -95,7 +95,6 @@ T3ContAdrH:		.byte	1
 	;Load new value into counter
 	ldi		@0,	@1			;Wait number of ticks specified in @1 arguement
 	sleep
-ExitMacro:
 .ENDMACRO
 
 ;******************************************************************************
@@ -108,7 +107,6 @@ ExitMacro:
 	;Load new value into counter
 	lds		@0,	@1			;Wait number of ticks specified in @1 arguement
 	sleep
-ExitMacro:
 .ENDMACRO
 
 .else
@@ -138,6 +136,17 @@ ExitMacro:
 .ENDMACRO
 
 .endif ; USE_TASK_YIELD
+
+;******************************************************************************
+; init_tasks: Initialize tasks
+;******************************************************************************
+.MACRO INIT_TASKS
+	;Place initialization code here, e.g. I/O port data direction
+	ldi		gen_reg,	2
+	sts		t2blocktime,	gen_reg
+	ldi		gen_reg,	5
+	sts		t3blocktime,	gen_reg
+.ENDMACRO
 
 #endif
 
