@@ -96,7 +96,7 @@ RESET:
 	sts		T3ContAdrH,	gen_reg
 
 	;All tasks ready to run
-	ldi		Ready2run,	(1<<T1readybit)|(1<<T2readybit)|(1<<T3readybit)
+	ldi		Ready2run,	~((1<<T1readybit)|(1<<T2readybit)|(1<<T3readybit))
 
 	;Idle task currently running
 	ldi		CurTask,	Idlcurrent
@@ -134,9 +134,8 @@ IDLE:
 .ifdef USE_TASK_YIELD
 TASK_YIELD:
 	mov		gen_reg,	CurTask
-	com		gen_reg					;If inverted logic is used for Ready2run, this instruction can be removed
 	and		Ready2run,	gen_reg		;Currently running task no longer ready to run
-	sbr		Ready2run,	(1 << Nottickbit)
+	cbr		Ready2run,	(1 << Nottickbit)
 	;rjmp	TICK_ISR
 .endif ; USE_TASK_YIELD
 ;******************************************************************************
@@ -184,7 +183,7 @@ DUMMY_SAVE_IDL:
 DEC_COUNTERS:
 	;Decrement counters
 .ifdef USE_TASK_YIELD
-	sbrc	Ready2run,	Nottickbit	;Don't decrement counters on task yield
+	sbrs	Ready2run,	Nottickbit	;Don't decrement counters on task yield
 	rjmp	REST_CONTEXT
 .endif ; USE_TASK_YIELD
 T1_DEC:
@@ -192,10 +191,10 @@ T1_DEC:
 	dec		T1_count
 	brbs	SREG_Z,		SET_T1_BIT	;Check if sign bit in status reg is set
 CLR_T1_BIT:
-	cbr		Ready2run,	T1rdymask
+	sbr		Ready2run,	T1rdymask
 	rjmp	T2_DEC
 SET_T1_BIT:
-	sbr		Ready2run,	T1rdymask
+	cbr		Ready2run,	T1rdymask
 	inc		T1_count				;Clear counter
 
 T2_DEC:
@@ -203,10 +202,10 @@ T2_DEC:
 	dec		T2_count
 	brbs	SREG_Z,		SET_T2_BIT	;Check if sign bit in status reg is set
 CLR_T2_BIT:
-	cbr		Ready2run,	T2rdymask
+	sbr		Ready2run,	T2rdymask
 	rjmp	T3_DEC
 SET_T2_BIT:
-	sbr		Ready2run,	T2rdymask
+	cbr		Ready2run,	T2rdymask
 	inc		T2_count				;Clear counter
 
 T3_DEC:
@@ -214,16 +213,16 @@ T3_DEC:
 	dec		T3_count
 	brbs	SREG_Z,		SET_T3_BIT	;Check if sign bit in status reg is set
 CLR_T3_BIT:
-	cbr		Ready2run,	T3rdymask
+	sbr		Ready2run,	T3rdymask
 	rjmp	REST_CONTEXT
 SET_T3_BIT:
-	sbr		Ready2run,	T3rdymask
+	cbr		Ready2run,	T3rdymask
 	inc		T3_count				;Clear counter
 	;rjmp	REST_CONTEXT	
 
 REST_CONTEXT:
 .ifdef USE_TASK_YIELD
-	cbr		Ready2run,	(1 << Nottickbit)
+	sbr		Ready2run,	(1 << Nottickbit)
 .endif ; USE_TASK_YIELD
 	;Check which task to run next, restore context
 	;Task switcher based on the model of:
@@ -231,13 +230,13 @@ REST_CONTEXT:
 	; - Task 2 medium priority
 	; - Task 1 lowest priority
 	;If Ready to run register = 0 (No tasks ready to run, therefore run idle task)
-	sbrc	Ready2run,	T3readybit
+	sbrs	Ready2run,	T3readybit
 	rjmp	RUN_TASK3
 
-	sbrc	Ready2run,	T2readybit
+	sbrs	Ready2run,	T2readybit
 	rjmp	RUN_TASK2
 
-	sbrc	Ready2run,	T1readybit
+	sbrs	Ready2run,	T1readybit
 	rjmp	RUN_TASK1
 
 RUN_IDLE:
