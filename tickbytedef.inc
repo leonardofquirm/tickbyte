@@ -53,6 +53,7 @@
 .def	Ready2run		=		r20	;Ready to run register
 .def	CurTask			=		r21	;Register indicating currently running task
 
+.equ	Idlebit			=		0	;Idle bit in ready to run
 .equ	T1readybit		=		1	;Task 1 ready to run bit
 .equ	T2readybit		=		2	;Task 2 ready to run bit
 .equ	T3readybit		=		3	;Task 3 ready to run bit
@@ -62,7 +63,7 @@
 .equ	T2rdymask		=		(1<<T2readybit)	;Task 2 ready to run mask
 .equ	T3rdymask		=		(1<<T3readybit)	;Task 3 ready to run mask
 
-.equ	Idlcurrent		=		0b00000001	;Idle task currently running
+.equ	Idlcurrent		=		(1<<Idlebit)	;Idle task currently running
 .equ	T1current		=		(1<<T1readybit)	;Task 1 currently running
 .equ	T2current		=		(1<<T2readybit)	;Task 2 currently running
 .equ	T3current		=		(1<<T3readybit)	;Task 3 currently running
