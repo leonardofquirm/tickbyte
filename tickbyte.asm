@@ -102,7 +102,7 @@ RESET:
 	sts		T3ContAdrH,	gen_reg
 
 	;All tasks ready to run
-	ldi		Ready2run,	0b00001110
+	ldi		Ready2run,	(1<<T1readybit)|(1<<T2readybit)|(1<<T3readybit)
 
 	;Idle task currently running
 	ldi		CurTask,	Idlcurrent

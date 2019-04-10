@@ -58,14 +58,14 @@
 .equ	T3readybit		=		3	;Task 3 ready to run bit
 .equ	Nottickbit		=		7	;Bit indicating manual ISR call
 
-.equ	T1rdymask		=		0b00000010	;Task 1 ready to run mask
-.equ	T2rdymask		=		0b00000100	;Task 2 ready to run mask
-.equ	T3rdymask		=		0b00001000	;Task 3 ready to run mask
+.equ	T1rdymask		=		(1<<T1readybit)	;Task 1 ready to run mask
+.equ	T2rdymask		=		(1<<T2readybit)	;Task 2 ready to run mask
+.equ	T3rdymask		=		(1<<T3readybit)	;Task 3 ready to run mask
 
 .equ	Idlcurrent		=		0b00000001	;Idle task currently running
-.equ	T1current		=		0b00000010	;Task 1 currently running
-.equ	T2current		=		0b00000100	;Task 2 currently running
-.equ	T3current		=		0b00001000	;Task 3 currently running
+.equ	T1current		=		(1<<T1readybit)	;Task 1 currently running
+.equ	T2current		=		(1<<T2readybit)	;Task 2 currently running
+.equ	T3current		=		(1<<T3readybit)	;Task 3 currently running
 
 
 ;Reserve space in RAM for task context, which consist only of program counter
