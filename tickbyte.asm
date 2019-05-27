@@ -19,13 +19,13 @@
 ;******************************************************************************
 .org	0X0000
 	rjmp	RESET					;the reset vector: jump to "RESET"
-.ifndef USE_ACCURATE_TICK
+#if !defined(USE_ACCURATE_TICK)
 .org	OVF0addr
 	rjmp 	TICK_ISR				;timer 0 overflow interrupt vector
-.else
+#else
 .org	OC0Aaddr
 	rjmp 	TICK_ISR				;timer 0 output compare match A interrupt vector
-.endif ; USE_ACCURATE_TICK
+#endif ; USE_ACCURATE_TICK
 
 ;******************************************************************************
 ;*
@@ -38,13 +38,13 @@
 RESET:
 	;Initialize counters. These should not be zero unless maximum start block
 	;time is desired for the particular task
-.ifndef USE_MAX_START_BLOCK_TIME
+#if !defined(USE_MAX_START_BLOCK_TIME)
 	ldi		T1_count,	0x01
 	ldi		T2_count,	0x01
 	ldi		T3_count,	0x01
-.endif ; USE_MAX_START_BLOCK_TIME
+#endif ; USE_MAX_START_BLOCK_TIME
 
-.ifndef USE_ACCURATE_TICK
+#if !defined(USE_ACCURATE_TICK)
 ;Setup timer 0
 	ldi		gen_reg,	1<<CS00		;Clock source = system clock, no prescaler
 	out		TCCR0B,		gen_reg
@@ -52,7 +52,7 @@ RESET:
 	ldi		gen_reg,	1<<TOIE0	;Enable timer 0 overflow interrupt
 	out		TIMSK0,		gen_reg
 	
-.else
+#else
 
 ;Setup timer 0
 	;Load high byte
@@ -68,7 +68,7 @@ RESET:
 	ldi		gen_reg,	1<<OCIE0A	;Enable output compare A match interrupt
 	out		TIMSK0,		gen_reg
 	
-.endif
+#endif ; USE_ACCURATE_TICK
 
 	;Setup sleep mode
 	;For now we'll use the default idle sleep mode, no need to set SMCR
@@ -101,11 +101,13 @@ RESET:
 	;Idle task currently running
 	ldi		CurTask,	Idlcurrent
 
-.ifdef USE_SLEEP_IDLE
+; If USE_SLEEP_IDLE and USE_TASK_YIELD are both disabled, task blocking can't
+; occur unless AVR sleep mode is enabled
+#if (defined(USE_SLEEP_IDLE) || (!defined(USE_SLEEP_IDLE) && !defined(USE_TASK_YIELD)))
 	;Enable sleep mode
 	ldi		gen_reg,	1<<SE		
 	out		SMCR,		gen_reg		;Write SE bit in SMCR to logic one
-.endif ; USE_SLEEP_IDLE
+#endif
 
 	;Initialize tasks
 	INIT_TASKS
@@ -116,9 +118,9 @@ RESET:
 IDLE:
 	;Reset watchdog timer
 	;wdr
-.ifdef USE_SLEEP_IDLE
-	sleep							;Enter sleep mode
-.endif ; USE_SLEEP_IDLE
+#if defined(USE_SLEEP_IDLE)
+	sleep
+#endif ; USE_SLEEP_IDLE
 
 	rjmp	IDLE
 
@@ -131,13 +133,13 @@ IDLE:
 ;******************************************************************************
 ; Task yield. Called from a task to force context switch
 ;******************************************************************************
-.ifdef USE_TASK_YIELD
+#if defined(USE_TASK_YIELD)
 TASK_YIELD:
 	mov		gen_reg,	CurTask
-	and		Ready2run,	gen_reg		;Currently running task no longer ready to run
+	or		Ready2run,	gen_reg		;Currently running task no longer ready to run
 	cbr		Ready2run,	(1 << Nottickbit)
 	;rjmp	TICK_ISR
-.endif ; USE_TASK_YIELD
+#endif ; USE_TASK_YIELD
 ;******************************************************************************
 ; RTOS tick interrupt
 ;******************************************************************************
@@ -182,10 +184,10 @@ DUMMY_SAVE_IDL:
 
 DEC_COUNTERS:
 	;Decrement counters
-.ifdef USE_TASK_YIELD
+#if defined (USE_TASK_YIELD)
 	sbrs	Ready2run,	Nottickbit	;Don't decrement counters on task yield
 	rjmp	REST_CONTEXT
-.endif ; USE_TASK_YIELD
+#endif ; USE_TASK_YIELD
 T1_DEC:
 	;Decrement counter 1
 	dec		T1_count
@@ -221,9 +223,9 @@ SET_T3_BIT:
 	;rjmp	REST_CONTEXT	
 
 REST_CONTEXT:
-.ifdef USE_TASK_YIELD
+#if defined (USE_TASK_YIELD)
 	sbr		Ready2run,	(1 << Nottickbit)
-.endif ; USE_TASK_YIELD
+#endif ; USE_TASK_YIELD
 	;Check which task to run next, restore context
 	;Task switcher based on the model of:
 	; - Task 3 highest priority

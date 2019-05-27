@@ -19,7 +19,7 @@
 ; long enough to not starve lower priority tasks of CPU time, since the CPU is
 ; placed in sleep mode each time a task blocks instead of yielding
 ;******************************************************************************
-;.equ USE_TASK_YIELD = 0x01
+;#define USE_TASK_YIELD 0x01
 
 ;******************************************************************************
 ; USE_ACCURATE_TICK
@@ -28,7 +28,7 @@
 ; of more program space usage for initialization of timer. Otherwise the timer
 ; overflow interrupt mechanism is used as tick interrupt
 ;******************************************************************************
-;.equ USE_ACCURATE_TICK = 0x01
+;#define USE_ACCURATE_TICK 0x01
 
 ;******************************************************************************
 ; USE_MAX_START_BLOCK_TIME
@@ -36,14 +36,14 @@
 ; but will cause all tasks to block for the maximum possible block time at
 ; startup
 ;******************************************************************************
-.equ USE_MAX_START_BLOCK_TIME = 0x01
+#define USE_MAX_START_BLOCK_TIME 0x01
 
 ;******************************************************************************
 ; USE_SLEEP_IDLE
 ; Commenting this line will reduce code size by removing need for sleep when
 ; idle, but will likely result in increased power consumption
 ;******************************************************************************
-;.equ USE_SLEEP_IDLE = 0x01
+;#define USE_SLEEP_IDLE 0x01
 
 ;******************************************************************************
 ; Set output compare match register when USE_ACCURATE_TICK is enabled
@@ -91,7 +91,7 @@ T3ContAdrL:		.byte	1
 .org	RAMEND - 5
 T3ContAdrH:		.byte	1
 
-.ifndef USE_TASK_YIELD
+#if !defined(USE_TASK_YIELD)
 
 ;******************************************************************************
 ; Macro used for blocking tasks, passing constant
@@ -116,7 +116,7 @@ T3ContAdrH:		.byte	1
 	sleep
 .ENDMACRO
 
-.else
+#else
 
 ;******************************************************************************
 ; Macro used for blocking tasks, passing constant
@@ -142,7 +142,7 @@ T3ContAdrH:		.byte	1
 	rcall	TASK_YIELD
 .ENDMACRO
 
-.endif ; USE_TASK_YIELD
+#endif ; USE_TASK_YIELD
 
 ;******************************************************************************
 ; init_tasks: Initialize tasks
