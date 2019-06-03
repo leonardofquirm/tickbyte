@@ -6,6 +6,7 @@
 ;******************************************************************************
 
 .include "tickbytedef.inc"
+.include "projectdef.inc"
 .include "tickbyte.asm"
 
 

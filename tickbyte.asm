@@ -6,6 +6,7 @@
 ;*
 ;******************************************************************************
 .include "tickbytedef.inc"
+.include "projectdef.inc"
 
 .cseg
 
@@ -36,12 +37,14 @@
 ; MAIN
 ;******************************************************************************
 RESET:
+#if !defined(USE_MAX_START_BLOCK_TIME)
 	;Initialize counters. These should not be zero unless maximum start block
 	;time is desired for the particular task
-#if !defined(USE_MAX_START_BLOCK_TIME)
 	ldi		T1_count,	0x01
 	ldi		T2_count,	0x01
 	ldi		T3_count,	0x01
+	;All tasks ready to run
+	ldi		Ready2run,	~((1<<T1readybit)|(1<<T2readybit)|(1<<T3readybit))
 #endif ; USE_MAX_START_BLOCK_TIME
 
 #if !defined(USE_ACCURATE_TICK)
@@ -51,9 +54,7 @@ RESET:
 
 	ldi		gen_reg,	1<<TOIE0	;Enable timer 0 overflow interrupt
 	out		TIMSK0,		gen_reg
-	
 #else
-
 ;Setup timer 0
 	;Load high byte
 	ldi		gen_reg,	CmpMatchH
@@ -67,7 +68,6 @@ RESET:
 
 	ldi		gen_reg,	1<<OCIE0A	;Enable output compare A match interrupt
 	out		TIMSK0,		gen_reg
-	
 #endif ; USE_ACCURATE_TICK
 
 	;Setup sleep mode
@@ -94,9 +94,6 @@ RESET:
 	sts		T3ContAdrL,	gen_reg
 	ldi		gen_reg,	HIGH( TASK3 )
 	sts		T3ContAdrH,	gen_reg
-
-	;All tasks ready to run
-	ldi		Ready2run,	~((1<<T1readybit)|(1<<T2readybit)|(1<<T3readybit))
 
 	;Idle task currently running
 	ldi		CurTask,	Idlcurrent
