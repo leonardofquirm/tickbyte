@@ -10,7 +10,7 @@ two words: tick, which refers to the system tick; and byte, which is our
 
 ## Features for version 0.2
 * Project with all 3 tasks already populated with a blocking statement
-  - 222 bytes total program memory usage (43.4% for ATiny4) configured for
+  - 210 bytes total program memory usage (41.0% for ATiny4) configured for
     minimum code size
   - 6 bytes RAM usage (18.8% for ATtiny4)
 * Typically 3% CPU load consumed by kernel at 1kHz tick rate
@@ -21,7 +21,7 @@ two words: tick, which refers to the system tick; and byte, which is our
 * Create a new assembler project with AVRStudio 4.18 or 4.19
 * Rename tickbyte_prj_template.asm to your project name
 * Configure the following to balance functionality vs code size in
-  tickbytedef.inc:
+  projectdef.inc:
   - USE_TASK_YIELD
   - USE_ACCURATE_TICK
   - USE_MAX_START_BLOCK_TIME
@@ -118,5 +118,5 @@ Also do not block when interrupts are disabled
   constrained devices, and unsurprisingly, some of the same restrictions
   http://www.freertos.org/co-routine-limitations.html
 * How FreeRTOS works. Not the same way tickbyte works, but interesting reading
-  for anyone interested in RTOS. Example of impementation on AVR
+  for anyone interested in RTOS. Example of implementation on AVR
   http://www.freertos.org/implementation/a00018.html

@@ -6,6 +6,7 @@
 ;******************************************************************************
 
 .include "tickbytedef.inc"
+.include "projectdef.inc"
 .include "tickbyte.asm"
 
 
@@ -16,21 +17,9 @@
 .org		SRAM_START
 t3blocktime:	.byte		1
 .org		SRAM_START+1
-t2blocktime:       .byte	1
+t2blocktime:	.byte		1
 
 .cseg
-
-;******************************************************************************
-; init_tasks: Initialize tasks
-;******************************************************************************
-INIT_TASKS:
-	;Place initialization code here, e.g. I/O port data direction
-	ldi		gen_reg,	2
-	sts		t2blocktime,	gen_reg
-	ldi		gen_reg,	5
-	sts		t3blocktime,	gen_reg
-	ret
-
 
 ;******************************************************************************
 ; TASK1

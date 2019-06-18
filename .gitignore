@@ -5,3 +5,6 @@ labels.tmp
 *.hex
 *.map
 *.obj
+*.bak
+*.old
+*~
