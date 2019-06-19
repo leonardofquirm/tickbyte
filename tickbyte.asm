@@ -142,6 +142,7 @@ TASK_YIELD:
 ;******************************************************************************
 TICK_ISR:							;ISR_TOV0
 SAVE_CONTEXT:
+	pop		gen_reg
 	;Save context of task currently running: Check which task is running
 	cpi		CurTask,	Idlcurrent
 	breq	DUMMY_SAVE_IDL
@@ -152,7 +153,6 @@ SAVE_CONTEXT:
 
 SAVECONT3:
 	;Save context of task 3
-	pop		gen_reg
 	sts		T3ContAdrH,	gen_reg
 	pop		gen_reg
 	sts		T3ContAdrL,	gen_reg
@@ -160,7 +160,6 @@ SAVECONT3:
 
 SAVECONT2:
 	;Save context of task 2
-	pop		gen_reg
 	sts		T2ContAdrH,	gen_reg
 	pop		gen_reg
 	sts		T2ContAdrL,	gen_reg
@@ -168,7 +167,6 @@ SAVECONT2:
 
 SAVECONT1:
 	;Save context of task 1
-	pop		gen_reg
 	sts		T1ContAdrH,	gen_reg
 	pop		gen_reg
 	sts		T1ContAdrL,	gen_reg
@@ -176,7 +174,6 @@ SAVECONT1:
 
 DUMMY_SAVE_IDL:
 	;Dummy save context: pop from stack to prevent stack overflow
-	pop		gen_reg
 	pop		gen_reg
 
 DEC_COUNTERS:
