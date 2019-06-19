@@ -10,7 +10,7 @@ two words: tick, which refers to the system tick; and byte, which is our
 
 ## Features for version 0.2
 * Project with all 3 tasks already populated with a blocking statement
-  - 196 bytes total program memory usage (38.3% for ATiny4) configured for
+  - 184 bytes total program memory usage (35.9% for ATtiny4) configured for
     minimum code size
   - 6 bytes RAM usage (18.8% for ATtiny4)
 * Typically 3% CPU load consumed by kernel at 1kHz tick rate

@@ -232,40 +232,33 @@ REST_CONTEXT:
 RUN_IDLE:
 	;Idle task running
 	ldi		CurTask,	Idlcurrent
-
 	ldi		XL,			LOW( IDLE )
-	push	XL
 	ldi		XH,			HIGH( IDLE )
-	push	XH
-	reti
+	rjmp	PUSH_RETI
 
 RUN_TASK3:
 	;Task1 running
 	ldi		CurTask,	T3current
-
 	lds		XL,			T3ContAdrL
-	push	XL
 	lds		XH,			T3ContAdrH
-	push	XH
-	reti
+	rjmp	PUSH_RETI
 
 RUN_TASK2:
 	;Task1 running
 	ldi		CurTask,	T2current
-
 	lds		XL,			T2ContAdrL
-	push	XL
 	lds		XH,			T2ContAdrH
-	push	XH
-	reti
+	rjmp	PUSH_RETI
 
 RUN_TASK1:
 	;Task1 running
 	ldi		CurTask,	T1current
-
 	lds		XL,			T1ContAdrL
-	push	XL
 	lds		XH,			T1ContAdrH
+	;rjmp	PUSH_RETI
+
+PUSH_RETI:
+	push	XL
 	push	XH
 	reti
 
