@@ -10,7 +10,7 @@ two words: tick, which refers to the system tick; and byte, which is our
 
 ## Features for version 0.2
 * Project with all 3 tasks already populated with a blocking statement
-  - 204 bytes total program memory usage (39.8% for ATiny4) configured for
+  - 196 bytes total program memory usage (38.3% for ATiny4) configured for
     minimum code size
   - 6 bytes RAM usage (18.8% for ATtiny4)
 * Typically 3% CPU load consumed by kernel at 1kHz tick rate
@@ -40,9 +40,9 @@ two words: tick, which refers to the system tick; and byte, which is our
 * Similarly to block for a variable amount of time you can use "blocktv"
   blockt	T2_count,	varticks	;Wait 10 ticks
   where varticks is the RAM address of variable containing variable declared
-* Registers 17 to 21 are reserved for the task switcher, so writing to them may
+* Registers 16 to 20 are reserved for the task switcher, so writing to them may
   cause undesired results. For those interested, refer to tickbytedef.inc
-* Register 16 has been defined with symbolic name gen_reg and can be used by
+* X register is used by kernel during context switching but can be used by
   tasks, *provided that interrupts are cleared before read/write operations and
   re-enabled again when done*
 * Blocking for 1 tick does not allow lower priority tasks to run when

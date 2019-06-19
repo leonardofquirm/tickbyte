@@ -49,51 +49,51 @@ RESET:
 
 #if !defined(USE_ACCURATE_TICK)
 ;Setup timer 0
-	ldi		gen_reg,	1<<CS00		;Clock source = system clock, no prescaler
-	out		TCCR0B,		gen_reg
+	ldi		XH,			1<<CS00		;Clock source = system clock, no prescaler
+	out		TCCR0B,		XH
 
-	ldi		gen_reg,	1<<TOIE0	;Enable timer 0 overflow interrupt
-	out		TIMSK0,		gen_reg
+	ldi		XH,			1<<TOIE0	;Enable timer 0 overflow interrupt
+	out		TIMSK0,		XH
 #else
 ;Setup timer 0
 	;Load high byte
-	ldi		gen_reg,	CmpMatchH
-	out		OCR0AH,		gen_reg
+	ldi		XH,			CmpMatchH
+	out		OCR0AH,		XH
 	;Load low byte
-	ldi		gen_reg,	CmpMatchL
-	out		OCR0AL,		gen_reg
+	ldi		XL,			CmpMatchL
+	out		OCR0AL,		XL
 	
-	ldi		gen_reg,	(1<<CS00)|(1<<WGM02)		;Clock source = system clock, no prescaler
-	out		TCCR0B,		gen_reg
+	ldi		XH,			(1<<CS00)|(1<<WGM02)		;Clock source = system clock, no prescaler
+	out		TCCR0B,		XH
 
-	ldi		gen_reg,	1<<OCIE0A	;Enable output compare A match interrupt
-	out		TIMSK0,		gen_reg
+	ldi		XH,			1<<OCIE0A	;Enable output compare A match interrupt
+	out		TIMSK0,		XH
 #endif ; USE_ACCURATE_TICK
 
 	;Setup sleep mode
 	;For now we'll use the default idle sleep mode, no need to set SMCR
-	;ldi		gen_reg,	0x00
-	;out		SMCR,		gen_reg
+	;ldi		XH,			0x00
+	;out		SMCR,		XH
 
 	;Initialize stack pointer
-	ldi		gen_reg,	RAMEND - 6
-	out		SPL,		gen_reg
+	ldi		XL,			RAMEND - 6
+	out		SPL,		XL
 
 	;Initialize program counter of task 1
-	ldi		gen_reg,	LOW( TASK1 )
-	sts		T1ContAdrL,	gen_reg
-	ldi		gen_reg,	HIGH( TASK1 )
-	sts		T1ContAdrH,	gen_reg
+	ldi		XL,			LOW( TASK1 )
+	sts		T1ContAdrL,	XL
+	ldi		XH,			HIGH( TASK1 )
+	sts		T1ContAdrH,	XH
 	;Initialize program counter of task 2
-	ldi		gen_reg,	LOW( TASK2 )
-	sts		T2ContAdrL,	gen_reg
-	ldi		gen_reg,	HIGH( TASK2 )
-	sts		T2ContAdrH,	gen_reg
+	ldi		XL,			LOW( TASK2 )
+	sts		T2ContAdrL,	XL
+	ldi		XH,			HIGH( TASK2 )
+	sts		T2ContAdrH,	XH
 	;Initialize program counter of task 3
-	ldi		gen_reg,	LOW( TASK3 )
-	sts		T3ContAdrL,	gen_reg
-	ldi		gen_reg,	HIGH( TASK3 )
-	sts		T3ContAdrH,	gen_reg
+	ldi		XL,			LOW( TASK3 )
+	sts		T3ContAdrL,	XL
+	ldi		XH,			HIGH( TASK3 )
+	sts		T3ContAdrH,	XH
 
 	;Idle task currently running
 	ldi		CurTask,	Idlcurrent
@@ -102,8 +102,8 @@ RESET:
 ; occur unless AVR sleep mode is enabled
 #if (defined(USE_SLEEP_IDLE) || (!defined(USE_SLEEP_IDLE) && !defined(USE_TASK_YIELD)))
 	;Enable sleep mode
-	ldi		gen_reg,	1<<SE		
-	out		SMCR,		gen_reg		;Write SE bit in SMCR to logic one
+	ldi		XH,			1<<SE		
+	out		SMCR,		XH		;Write SE bit in SMCR to logic one
 #endif
 
 	;Initialize tasks
@@ -132,8 +132,8 @@ IDLE:
 ;******************************************************************************
 #if defined(USE_TASK_YIELD)
 TASK_YIELD:
-	mov		gen_reg,	CurTask
-	or		Ready2run,	gen_reg		;Currently running task no longer ready to run
+	mov		XH,			CurTask
+	or		Ready2run,	XH		;Currently running task no longer ready to run
 	cbr		Ready2run,	(1 << Nottickbit)
 	;rjmp	TICK_ISR
 #endif ; USE_TASK_YIELD
@@ -142,10 +142,11 @@ TASK_YIELD:
 ;******************************************************************************
 TICK_ISR:							;ISR_TOV0
 SAVE_CONTEXT:
-	pop		gen_reg
+	pop		XH
+	pop		XL
 	;Save context of task currently running: Check which task is running
 	cpi		CurTask,	Idlcurrent
-	breq	DUMMY_SAVE_IDL
+	breq	DEC_COUNTERS
 	cpi		CurTask,	T1current
 	breq	SAVECONT1
 	cpi		CurTask,	T2current
@@ -153,28 +154,21 @@ SAVE_CONTEXT:
 
 SAVECONT3:
 	;Save context of task 3
-	sts		T3ContAdrH,	gen_reg
-	pop		gen_reg
-	sts		T3ContAdrL,	gen_reg
+	sts		T3ContAdrH,	XH
+	sts		T3ContAdrL,	XL
 	rjmp	DEC_COUNTERS
 
 SAVECONT2:
 	;Save context of task 2
-	sts		T2ContAdrH,	gen_reg
-	pop		gen_reg
-	sts		T2ContAdrL,	gen_reg
+	sts		T2ContAdrH,	XH
+	sts		T2ContAdrL,	XL
 	rjmp	DEC_COUNTERS
 
 SAVECONT1:
 	;Save context of task 1
-	sts		T1ContAdrH,	gen_reg
-	pop		gen_reg
-	sts		T1ContAdrL,	gen_reg
-	rjmp	DEC_COUNTERS
-
-DUMMY_SAVE_IDL:
-	;Dummy save context: pop from stack to prevent stack overflow
-	pop		gen_reg
+	sts		T1ContAdrH,	XH
+	sts		T1ContAdrL,	XL
+	;rjmp	DEC_COUNTERS
 
 DEC_COUNTERS:
 	;Decrement counters
@@ -239,40 +233,40 @@ RUN_IDLE:
 	;Idle task running
 	ldi		CurTask,	Idlcurrent
 
-	ldi		gen_reg,	LOW( IDLE )
-	push	gen_reg
-	ldi		gen_reg,	HIGH( IDLE )
-	push	gen_reg
+	ldi		XL,			LOW( IDLE )
+	push	XL
+	ldi		XH,			HIGH( IDLE )
+	push	XH
 	reti
 
 RUN_TASK3:
 	;Task1 running
 	ldi		CurTask,	T3current
 
-	lds		gen_reg,	T3ContAdrL
-	push	gen_reg
-	lds		gen_reg,	T3ContAdrH
-	push	gen_reg
+	lds		XL,			T3ContAdrL
+	push	XL
+	lds		XH,			T3ContAdrH
+	push	XH
 	reti
 
 RUN_TASK2:
 	;Task1 running
 	ldi		CurTask,	T2current
 
-	lds		gen_reg,	T2ContAdrL
-	push	gen_reg
-	lds		gen_reg,	T2ContAdrH
-	push	gen_reg
+	lds		XL,			T2ContAdrL
+	push	XL
+	lds		XH,			T2ContAdrH
+	push	XH
 	reti
 
 RUN_TASK1:
 	;Task1 running
 	ldi		CurTask,	T1current
 
-	lds		gen_reg,	T1ContAdrL
-	push	gen_reg
-	lds		gen_reg,	T1ContAdrH
-	push	gen_reg
+	lds		XL,			T1ContAdrL
+	push	XL
+	lds		XH,			T1ContAdrH
+	push	XH
 	reti
 
 ;***EOF
