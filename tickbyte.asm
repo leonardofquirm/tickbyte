@@ -122,9 +122,7 @@ IDLE:
 ;******************************************************************************
 #if defined(USE_TASK_YIELD)
 TASK_YIELD:
-	mov		XH,			CurTask
-	or		Ready2run,	XH		;Currently running task no longer ready to run
-	cbr		Ready2run,	(1 << Nottickbit)
+	sbr		CurTask,	(1 << Nottickbit)
 	;rjmp	TICK_ISR
 #endif ; USE_TASK_YIELD
 ;******************************************************************************
@@ -135,12 +133,12 @@ SAVE_CONTEXT:
 	pop		XH
 	pop		XL
 	;Save context of task currently running: Check which task is running
-	cpi		CurTask,	Idlcurrent
-	breq	DEC_COUNTERS
-	cpi		CurTask,	T1current
-	breq	SAVECONT1
-	cpi		CurTask,	T2current
-	breq	SAVECONT2
+	sbrc	CurTask,	Idlebit
+	rjmp	DEC_COUNTERS
+	sbrc	CurTask,	T1readybit
+	rjmp	SAVECONT1
+	sbrc	CurTask,	T2readybit
+	rjmp	SAVECONT2
 
 SAVECONT3:
 	;Save context of task 3
@@ -163,7 +161,7 @@ SAVECONT1:
 DEC_COUNTERS:
 	;Decrement counters
 #if defined (USE_TASK_YIELD)
-	sbrs	Ready2run,	Nottickbit	;Don't decrement counters on task yield
+	sbrc	CurTask,	Nottickbit	;Don't decrement counters on task yield
 	rjmp	REST_CONTEXT
 #endif ; USE_TASK_YIELD
 T1_DEC:
@@ -186,9 +184,6 @@ T3_DEC:
 	;rjmp	REST_CONTEXT	
 
 REST_CONTEXT:
-#if defined (USE_TASK_YIELD)
-	sbr		Ready2run,	(1 << Nottickbit)
-#endif ; USE_TASK_YIELD
 	;Check which task to run next, restore context
 	;Task switcher based on the model of:
 	; - Task 3 highest priority
