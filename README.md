@@ -9,11 +9,11 @@ two words: tick, which refers to the system tick; and byte, which is our
 
 
 ## Features for version 0.2
-* Project with all 3 tasks already populated with a blocking statement
-  - 184 bytes total program memory usage (35.9% for ATtiny4) configured for
+* Project with all 3 tasks already populated with a blockt statement
+  - 166 bytes total program memory usage (32.4% for ATtiny4) configured for
     minimum code size
   - 6 bytes RAM usage (18.8% for ATtiny4)
-* Typically 3% CPU load consumed by kernel at 1kHz tick rate
+* Typically 3% CPU load consumed by kernel at 1kHz tick rate and 1MHz clock
 * Currently only supports ATtiny4/5/9/10
 
 
@@ -24,7 +24,7 @@ two words: tick, which refers to the system tick; and byte, which is our
   projectdef.inc:
   - USE_TASK_YIELD
   - USE_ACCURATE_TICK
-  - USE_MAX_START_BLOCK_TIME
+  - USE_SLEEP_IDLE
 * Add initialization code in INIT_TASKS, which is called before kernel is
   started
 * In tickbyte.asm, find TASK1, TASK2, and TASK3. Place your highest priority

@@ -37,16 +37,6 @@
 ; MAIN
 ;******************************************************************************
 RESET:
-#if !defined(USE_MAX_START_BLOCK_TIME)
-	;Initialize counters. These should not be zero unless maximum start block
-	;time is desired for the particular task
-	ldi		T1_count,	0x01
-	ldi		T2_count,	0x01
-	ldi		T3_count,	0x01
-	;All tasks ready to run
-	ldi		Ready2run,	~((1<<T1readybit)|(1<<T2readybit)|(1<<T3readybit))
-#endif ; USE_MAX_START_BLOCK_TIME
-
 #if !defined(USE_ACCURATE_TICK)
 ;Setup timer 0
 	ldi		XH,			1<<CS00		;Clock source = system clock, no prescaler
@@ -178,36 +168,21 @@ DEC_COUNTERS:
 #endif ; USE_TASK_YIELD
 T1_DEC:
 	;Decrement counter 1
+	cpi		T1_count,	0
+	breq	T2_DEC
 	dec		T1_count
-	brbs	SREG_Z,		SET_T1_BIT	;Check if sign bit in status reg is set
-CLR_T1_BIT:
-	sbr		Ready2run,	T1rdymask
-	rjmp	T2_DEC
-SET_T1_BIT:
-	cbr		Ready2run,	T1rdymask
-	inc		T1_count				;Clear counter
 
 T2_DEC:
 	;Decrement counter 2
+	cpi		T2_count,	0
+	breq	T3_DEC
 	dec		T2_count
-	brbs	SREG_Z,		SET_T2_BIT	;Check if sign bit in status reg is set
-CLR_T2_BIT:
-	sbr		Ready2run,	T2rdymask
-	rjmp	T3_DEC
-SET_T2_BIT:
-	cbr		Ready2run,	T2rdymask
-	inc		T2_count				;Clear counter
 
 T3_DEC:
 	;Decrement counter 3
+	cpi		T3_count,	0
+	breq	REST_CONTEXT
 	dec		T3_count
-	brbs	SREG_Z,		SET_T3_BIT	;Check if sign bit in status reg is set
-CLR_T3_BIT:
-	sbr		Ready2run,	T3rdymask
-	rjmp	REST_CONTEXT
-SET_T3_BIT:
-	cbr		Ready2run,	T3rdymask
-	inc		T3_count				;Clear counter
 	;rjmp	REST_CONTEXT	
 
 REST_CONTEXT:
@@ -220,14 +195,14 @@ REST_CONTEXT:
 	; - Task 2 medium priority
 	; - Task 1 lowest priority
 	;If Ready to run register = 0 (No tasks ready to run, therefore run idle task)
-	sbrs	Ready2run,	T3readybit
-	rjmp	RUN_TASK3
+	cpi		T3_count,	0
+	breq	RUN_TASK3
 
-	sbrs	Ready2run,	T2readybit
-	rjmp	RUN_TASK2
+	cpi		T2_count,	0
+	breq	RUN_TASK2
 
-	sbrs	Ready2run,	T1readybit
-	rjmp	RUN_TASK1
+	cpi		T1_count,	0
+	breq	RUN_TASK1
 
 RUN_IDLE:
 	;Idle task running
