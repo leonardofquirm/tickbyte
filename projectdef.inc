@@ -45,6 +45,8 @@
 ;******************************************************************************
 ;#define USE_SLEEP_IDLE 0x01
 
+.def	gen_reg		=		r21	;General register
+
 ;******************************************************************************
 ; INIT_TASKS: Task initialization called at startup
 ; Place initialization code here, e.g. I/O port data direction
