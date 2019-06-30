@@ -31,19 +31,13 @@
 ;#define USE_ACCURATE_TICK 0x01
 
 ;******************************************************************************
-; USE_MAX_START_BLOCK_TIME
-; Uncommenting this line will reduce code size for initialization of timers,
-; but will cause all tasks to block for the maximum possible block time at
-; startup
-;******************************************************************************
-#define USE_MAX_START_BLOCK_TIME 0x01
-
-;******************************************************************************
 ; USE_SLEEP_IDLE
 ; Commenting this line will reduce code size by removing need for sleep when
 ; idle, but will likely result in increased power consumption
 ;******************************************************************************
 ;#define USE_SLEEP_IDLE 0x01
+
+.def	gen_reg		=		r20	;General register
 
 ;******************************************************************************
 ; INIT_TASKS: Task initialization called at startup

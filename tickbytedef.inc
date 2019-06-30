@@ -20,22 +20,16 @@
 .equ	CmpMatchL		=		0xE7
 
 
-.def	gen_reg			=		r16	;General register
-.def	T1_count		=		r17	;Task 1 counter
-.def	T2_count		=		r18	;Task 2 counter
-.def	T3_count		=		r19	;Task 2 counter
-.def	Ready2run		=		r20	;Ready to run register
-.def	CurTask			=		r21	;Register indicating currently running task
+.def	T1_count		=		r16	;Task 1 counter
+.def	T2_count		=		r17	;Task 2 counter
+.def	T3_count		=		r18	;Task 2 counter
+.def	CurTask			=		r19	;Register indicating currently running task
 
 .equ	Idlebit			=		0	;Idle bit in ready to run
 .equ	T1readybit		=		1	;Task 1 ready to run bit
 .equ	T2readybit		=		2	;Task 2 ready to run bit
 .equ	T3readybit		=		3	;Task 3 ready to run bit
 .equ	Nottickbit		=		7	;Bit indicating manual ISR call
-
-.equ	T1rdymask		=		(1<<T1readybit)	;Task 1 ready to run mask
-.equ	T2rdymask		=		(1<<T2readybit)	;Task 2 ready to run mask
-.equ	T3rdymask		=		(1<<T3readybit)	;Task 3 ready to run mask
 
 .equ	Idlcurrent		=		(1<<Idlebit)	;Idle task currently running
 .equ	T1current		=		(1<<T1readybit)	;Task 1 currently running

@@ -9,11 +9,11 @@ two words: tick, which refers to the system tick; and byte, which is our
 
 
 ## Features for version 0.2
-* Project with all 3 tasks already populated with a blocking statement
-  - 210 bytes total program memory usage (41.0% for ATiny4) configured for
+* Project with all 3 tasks already populated with a blockt statement
+  - 166 bytes total program memory usage (32.4% for ATtiny4) configured for
     minimum code size
   - 6 bytes RAM usage (18.8% for ATtiny4)
-* Typically 3% CPU load consumed by kernel at 1kHz tick rate
+* Typically 3% CPU load consumed by kernel at 1kHz tick rate and 1MHz clock
 * Currently only supports ATtiny4/5/9/10
 
 
@@ -24,7 +24,7 @@ two words: tick, which refers to the system tick; and byte, which is our
   projectdef.inc:
   - USE_TASK_YIELD
   - USE_ACCURATE_TICK
-  - USE_MAX_START_BLOCK_TIME
+  - USE_SLEEP_IDLE
 * Add initialization code in INIT_TASKS, which is called before kernel is
   started
 * In tickbyte.asm, find TASK1, TASK2, and TASK3. Place your highest priority
@@ -40,9 +40,9 @@ two words: tick, which refers to the system tick; and byte, which is our
 * Similarly to block for a variable amount of time you can use "blocktv"
   blockt	T2_count,	varticks	;Wait 10 ticks
   where varticks is the RAM address of variable containing variable declared
-* Registers 17 to 21 are reserved for the task switcher, so writing to them may
+* Registers 16 to 19 are reserved for the task switcher, so writing to them may
   cause undesired results. For those interested, refer to tickbytedef.inc
-* Register 16 has been defined with symbolic name gen_reg and can be used by
+* X register is used by kernel during context switching but can be used by
   tasks, *provided that interrupts are cleared before read/write operations and
   re-enabled again when done*
 * Blocking for 1 tick does not allow lower priority tasks to run when
