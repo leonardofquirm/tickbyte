@@ -40,7 +40,7 @@ two words: tick, which refers to the system tick; and byte, which is our
 * Similarly to block for a variable amount of time you can use "blocktv"
   blockt	T2_count,	varticks	;Wait 10 ticks
   where varticks is the RAM address of variable containing variable declared
-* Registers 16 to 20 are reserved for the task switcher, so writing to them may
+* Registers 16 to 19 are reserved for the task switcher, so writing to them may
   cause undesired results. For those interested, refer to tickbytedef.inc
 * X register is used by kernel during context switching but can be used by
   tasks, *provided that interrupts are cleared before read/write operations and

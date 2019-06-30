@@ -37,7 +37,7 @@
 ;******************************************************************************
 ;#define USE_SLEEP_IDLE 0x01
 
-.def	gen_reg		=		r21	;General register
+.def	gen_reg		=		r20	;General register
 
 ;******************************************************************************
 ; INIT_TASKS: Task initialization called at startup
